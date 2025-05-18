@@ -4,6 +4,10 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib
+from matplotlib.font_manager import FontProperties
+import os
+import sys
 import pandas as pd
 from database import Database
 import time
@@ -22,7 +26,8 @@ class AdminApp:
         self.accent_color = "#3f51b5"
         self.text_color = "#333333"
         self.root.configure(bg=self.bg_color)
-
+        
+        self.setup_chinese_font()
         # 连接数据库
         self.db = Database()
 
@@ -31,7 +36,38 @@ class AdminApp:
 
         # 初始加载数据
         self.load_data()
-
+    
+    def setup_chinese_font (self):
+        """设置Matplotlib中文字体支持"""
+        # 方法一：尝试使用系统中可能存在的中文字体
+        try:
+            # 对于不同操作系统，常见的中文字体名称不同
+            if sys.platform.startswith('win'):
+                # Windows系统
+                font_path = 'C:/Windows/Fonts/msyh.ttc'  # 微软雅黑
+            elif sys.platform.startswith('darwin'):
+                # macOS系统
+                font_path = '/System/Library/Fonts/PingFang.ttc'  # 苹方字体
+            else:
+                # Linux系统
+                font_path = '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf'
+            
+            # 设置自定义字体
+            if os.path.exists(font_path):
+                self.chinese_font = FontProperties(fname=font_path)
+                matplotlib.rcParams['font.family'] = ['sans-serif']
+                matplotlib.rcParams['font.sans-serif'] = ['Arial', 'Helvetica', font_path]
+            else:
+                # 如果找不到特定字体文件，使用方法二
+                raise FileNotFoundError("未找到指定的字体文件")
+        
+        except Exception as e:
+            print(f"加载指定字体失败: {e}")
+            # 方法二：使用matplotlib默认配置尝试支持中文
+            matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
+            matplotlib.rcParams['axes.unicode_minus'] = False  # 解决负号'-'显示为方块的问题
+            self.chinese_font = FontProperties(family='sans-serif')
+            
     def create_ui(self):
         # 创建选项卡
         self.notebook = ttk.Notebook(self.root)
@@ -376,10 +412,10 @@ class AdminApp:
                 va="bottom",
             )
 
-        ax.set_title("用户活跃度")
-        ax.set_xlabel("用户名")
-        ax.set_ylabel("消息数")
-        ax.set_xticklabels(users, rotation=45, ha="right")
+        ax.set_title("用户活跃度", fontproperties=self.chinese_font)
+        ax.set_xlabel("用户名", fontproperties=self.chinese_font)
+        ax.set_ylabel("消息数", fontproperties=self.chinese_font)
+        ax.set_xticklabels(users, rotation=45, ha="right", fontproperties=self.chinese_font)
 
     def draw_daily_messages_chart(self, ax):
         # 获取最近7天的消息
@@ -415,9 +451,9 @@ class AdminApp:
                 linestyle="-",
                 color=self.accent_color,
             )
-            ax.set_title("每日消息量")
-            ax.set_xlabel("日期")
-            ax.set_ylabel("消息数")
+            ax.set_title("每日消息量", fontproperties=self.chinese_font)
+            ax.set_xlabel("日期", fontproperties=self.chinese_font)
+            ax.set_ylabel("消息数", fontproperties=self.chinese_font)
             ax.grid(True, linestyle="--", alpha=0.7)
 
             # 设置日期格式
@@ -425,14 +461,14 @@ class AdminApp:
             date_labels = [d.strftime(date_format) for d in complete_data.index]
             ax.set_xticklabels(date_labels, rotation=45)
         else:
-            ax.text(0.5, 0.5, "没有时间戳数据", ha="center", va="center")
+            ax.text(0.5, 0.5, "没有时间戳数据", ha="center", va="center", fontproperties=self.chinese_font)
 
     def draw_message_length_chart(self, ax):
         # 获取消息数据
         messages = self.db.get_messages(limit=1000)
 
         if not messages:
-            ax.text(0.5, 0.5, "没有足够的数据", ha="center", va="center")
+            ax.text(0.5, 0.5, "没有足够的数据", ha="center", va="center", fontproperties=self.chinese_font)
             return
 
         # 计算消息长度
@@ -440,9 +476,9 @@ class AdminApp:
 
         # 绘制直方图
         ax.hist(message_lengths, bins=20, color=self.accent_color, alpha=0.7)
-        ax.set_title("消息长度分布")
-        ax.set_xlabel("消息长度 (字符)")
-        ax.set_ylabel("消息数")
+        ax.set_title("消息长度分布", fontproperties=self.chinese_font)
+        ax.set_xlabel("消息长度 (字符)", fontproperties=self.chinese_font)
+        ax.set_ylabel("消息数", fontproperties=self.chinese_font)
         ax.grid(True, linestyle="--", alpha=0.7)
 
     def search_messages(self):

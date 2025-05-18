@@ -6,12 +6,12 @@ from datetime import datetime
 
 
 class Database:
-    def __init__(self, host="localhost", user="root", password="", database="chat_app"):
+    def __init__(self, host="localhost", user="root", password="aini", database="chat_app"):
         """初始化数据库连接和创建必要的表"""
         try:
             # 连接到MySQL服务器
             self.connection = mysql.connector.connect(
-                host=host, user=user, password=password
+                host=host, user=user, passwd=password
             )
             self.cursor = self.connection.cursor()
 
