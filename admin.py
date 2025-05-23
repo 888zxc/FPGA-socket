@@ -39,34 +39,27 @@ class AdminApp:
     
     def setup_chinese_font (self):
         """设置Matplotlib中文字体支持"""
-        # 方法一：尝试使用系统中可能存在的中文字体
         try:
-            # 对于不同操作系统，常见的中文字体名称不同
-            if sys.platform.startswith('win'):
-                # Windows系统
-                font_path = 'C:/Windows/Fonts/msyh.ttc'  # 微软雅黑
-            elif sys.platform.startswith('darwin'):
-                # macOS系统
-                font_path = '/System/Library/Fonts/PingFang.ttc'  # 苹方字体
-            else:
-                # Linux系统
-                font_path = '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf'
+            # 使用当前目录下的字体文件
+            import os
+            font_path = os.path.join(os.path.dirname(__file__), 'font', 'songti.ttf')
             
-            # 设置自定义字体
             if os.path.exists(font_path):
                 self.chinese_font = FontProperties(fname=font_path)
                 matplotlib.rcParams['font.family'] = ['sans-serif']
-                matplotlib.rcParams['font.sans-serif'] = ['Arial', 'Helvetica', font_path]
+                matplotlib.rcParams['font.sans-serif'] = [font_path, 'Arial', 'Helvetica']
+                print(f"成功加载字体: {font_path}")
             else:
-                # 如果找不到特定字体文件，使用方法二
-                raise FileNotFoundError("未找到指定的字体文件")
+                # 如果找不到指定字体文件，使用系统默认字体
+                raise FileNotFoundError(f"未找到字体文件: {font_path}")
         
         except Exception as e:
             print(f"加载指定字体失败: {e}")
-            # 方法二：使用matplotlib默认配置尝试支持中文
+            # 使用matplotlib默认配置尝试支持中文
             matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
-            matplotlib.rcParams['axes.unicode_minus'] = False  # 解决负号'-'显示为方块的问题
+            matplotlib.rcParams['axes.unicode_minus'] = False
             self.chinese_font = FontProperties(family='sans-serif')
+            print("使用系统默认字体")
             
     def create_ui(self):
         # 创建选项卡

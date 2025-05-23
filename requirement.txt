@@ -1,0 +1,4 @@
+tkinter
+mysql-connector-python
+matplotlib
+pandas
